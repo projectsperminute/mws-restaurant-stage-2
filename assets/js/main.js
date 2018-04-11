@@ -141,15 +141,29 @@ createRestaurantHTML = (restaurant) => {
   const picture = document.createElement('picture');
   li.append(picture);
 
+  const largeSourceWebp = document.createElement('source');
+  largeSourceWebp.media = "(min-width: 750px)";
+  largeSourceWebp.srcset = DBHelper.imageUrlForRestaurant(restaurant) + '-800_large.webp';
+  picture.append(largeSourceWebp);
+
   const largeSource = document.createElement('source');
   largeSource.media = "(min-width: 750px)";
   largeSource.srcset = DBHelper.imageUrlForRestaurant(restaurant) + '-800_large.jpg';
   picture.append(largeSource);
 
+  const mediumSourceWebp = document.createElement('source');
+  mediumSourceWebp.media = "(min-width: 500px)";
+  mediumSourceWebp.srcset = DBHelper.imageUrlForRestaurant(restaurant) + '_medium.webp';
+  picture.append(mediumSourceWebp);
+
   const mediumSource = document.createElement('source');
   mediumSource.media = "(min-width: 500px)";
   mediumSource.srcset = DBHelper.imageUrlForRestaurant(restaurant) + '_medium.jpg';
   picture.append(mediumSource);
+
+  const sourceWebp = document.createElement('source');
+  sourceWebp.srcset = DBHelper.imageUrlForRestaurant(restaurant) + '.webp';
+  picture.append(sourceWebp);
 
   const image = document.createElement('img');
   image.className = 'restaurant-img';

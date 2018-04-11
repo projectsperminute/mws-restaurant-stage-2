@@ -1,25 +1,29 @@
 /*eslint-env node */
 
-const gulp = require('gulp'),
-  sass = require('gulp-sass'),
-  autoprefixer = require('gulp-autoprefixer'),
-  browserSync = require('browser-sync').create(),
-  eslint = require('gulp-eslint'),
-  concat = require('gulp-concat'),
-  uglify = require('gulp-uglify'),
-  babel = require('gulp-babel'),
-  sourcemaps = require('gulp-sourcemaps'),
-  jasmine = require('gulp-jasmine-phantom');
+const gulp = require('gulp');
+const sass = require('gulp-sass');
+const autoprefixer = require('gulp-autoprefixer');
+const browserSync = require('browser-sync').create();
+const eslint = require('gulp-eslint');
+const concat = require('gulp-concat');
+const uglify = require('gulp-uglify');
+const babel = require('gulp-babel');
+const sourcemaps = require('gulp-sourcemaps');
+const jasmine = require('gulp-jasmine-phantom');
+const imagemin = require('gulp-imagemin');
+const imageminWebp = require('imagemin-webp');
+const rename = require("gulp-rename");
 
 // Static Server + watching scss/html files
 gulp.task('serve', ['styles'], function() {
 
   browserSync.init({
-    proxy: 'localhost:1337'
+    proxy: 'localhost:1337',
   });
 
   gulp.watch('assets/sass/**/*.scss', ['styles']);
-  gulp.watch('assets/js/**/*.js', ['lint']);
+  gulp.watch('assets/js/**/*.js', ['lint', 'scripts']);
+  gulp.watch('assets/img/*', ['images']);
   gulp.watch('views/**/*.ejs').on('change', browserSync.reload);
 });
 
@@ -27,8 +31,12 @@ gulp.task('serve', ['styles'], function() {
 gulp.task('styles', function() {
   return gulp.src('assets/sass/**/*.scss')
     .pipe(sourcemaps.init())
-    .pipe(sass({outputStyle: 'compressed'}).on('error',sass.logError))
-    .pipe(autoprefixer({ browsers: ['last 4 versions'] }))
+    .pipe(sass({
+      outputStyle: 'compressed'
+    }).on('error', sass.logError))
+    .pipe(autoprefixer({
+      browsers: ['last 4 versions']
+    }))
     .pipe(sourcemaps.write())
     .pipe(gulp.dest('.tmp/public/styles'))
     .pipe(browserSync.stream());
@@ -38,10 +46,11 @@ gulp.task('scripts', function () {
   gulp.src('assets/js/**/*.js')
     .pipe(sourcemaps.init())
     .pipe(babel())
-    .pipe(concat('all.js'))
+    //.pipe(concat('all.js'))
     .pipe(uglify())
     .pipe(sourcemaps.write())
-    .pipe(gulp.dest('.tmp/public/js'));
+    .pipe(gulp.dest('.tmp/public/js'))
+    .pipe(browserSync.stream());
 });
 
 gulp.task('lint', function() {
@@ -55,14 +64,28 @@ gulp.task('lint', function() {
     .pipe(eslint())
     // eslint.format() outputs the lint results to the console.
     // Alternatively use eslint.formatEach() (see Docs).
-    .pipe(eslint.format())
+    .pipe(eslint.format());
     // To have the process exit with an error code (1) on
     // lint error, return the stream and pipe to failAfterError last.
     //.pipe(eslint.failOnError());
+});
+
+gulp.task('images', function () {
+  gulp.src('assets/img/*')
+    .pipe(imagemin())
+    .pipe(gulp.dest('.tmp/public/img'))
+    .pipe(imagemin([
+      imageminWebp({quality: 50})
+    ]))
+    .pipe(rename({
+      extname: '.webp'
+    }))
+    .pipe(gulp.dest('.tmp/public/img/'))
+    .pipe(browserSync.stream());
 });
 
 gulp.task('tests', function () {
 
 });
 
-gulp.task('default', ['serve', 'lint']);
+gulp.task('default', ['serve', 'styles', 'lint', 'styles']);
