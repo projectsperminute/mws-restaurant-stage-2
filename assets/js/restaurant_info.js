@@ -55,20 +55,26 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
   const address = document.getElementById('restaurant-address');
   address.innerHTML = restaurant.address;
 
+  const imgSource = DBHelper.imageUrlForRestaurant(restaurant);
+
+  const largeSourceWebp = document.getElementById('restaurant-source-large-webp');
+  largeSourceWebp.srcset = imgSource + '-1600_large.webp 2x, ' + imgSource +'-800_large.webp';
+
   const largeSource = document.getElementById('restaurant-source-large');
-  let largeSrcset = DBHelper.imageUrlForRestaurant(restaurant);
-  largeSrcset = largeSrcset.replace(/.jpg/i, '');
-  largeSrcset = largeSrcset + '-1600_large.jpg 2x, ' + largeSrcset +'-800_large.jpg';
-  largeSource.srcset = largeSrcset;
+  largeSource.srcset = imgSource + '-1600_large.jpg 2x, ' + imgSource +'-800_large.jpg';
+
+  const mediumSourceWebp = document.getElementById('restaurant-source-medium-webp');
+  mediumSourceWebp.srcset = DBHelper.imageUrlForRestaurant(restaurant) + '_medium.webp';
 
   const mediumSource = document.getElementById('restaurant-source-medium');
-  let mediumSrcset = DBHelper.imageUrlForRestaurant(restaurant);
-  mediumSrcset = mediumSrcset.replace(/.jpg/i, '_medium.jpg');
-  mediumSource.srcset = mediumSrcset;
+  mediumSource.srcset = DBHelper.imageUrlForRestaurant(restaurant) + '_medium.jpg';
+
+  const webpSource = document.getElementById('restaurant-source-webp');
+  webpSource.srcset = DBHelper.imageUrlForRestaurant(restaurant) + '.webp';
 
   const image = document.getElementById('restaurant-img');
   image.className = 'restaurant-img'
-  image.src = DBHelper.imageUrlForRestaurant(restaurant);
+  image.src = DBHelper.imageUrlForRestaurant(restaurant) + '.jpg';
   image.alt = restaurant.name + ' is a ' + restaurant.cuisine_type + ' restaurant in ' + restaurant.address + '.';
 
   const cuisine = document.getElementById('restaurant-cuisine');
