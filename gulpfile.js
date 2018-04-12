@@ -45,8 +45,8 @@ gulp.task('styles', function() {
 gulp.task('scripts', function () {
   gulp.src('assets/js/**/*.js')
     .pipe(sourcemaps.init())
-    //.pipe(babel()) // todo Transpiling breaks JS
-    //.pipe(uglify()) // todo Can't minify ES6 code
+    .pipe(babel()) // todo Transpiling breaks JS
+    .pipe(uglify()) // todo Can't minify ES6 code
     .pipe(sourcemaps.write())
     .pipe(gulp.dest('.tmp/public/js'))
     .pipe(browserSync.stream());
