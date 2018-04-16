@@ -1,4 +1,4 @@
-var staticCacheName = 'restaurant-reviews-v42';
+var staticCacheName = 'restaurant-reviews-v43';
 var contentImgsCache = 'restaurant-reviews-content-imgs';
 var allCaches = [staticCacheName, contentImgsCache];
 var urlsToCache = [
@@ -6,7 +6,7 @@ var urlsToCache = [
   '/resources/restaurant.html',
   '/resources/manifest.json',
   '/styles/styles.css',
-  '/js/idb.js',
+  '/js/idb/lib/idb.js',
   '/js/dbhelper.js',
   '/js/main.js',
   '/js/restaurant_info.js'
