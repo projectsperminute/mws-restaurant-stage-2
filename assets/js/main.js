@@ -100,6 +100,7 @@ var updateRestaurants = () => {
     if (error) { // Got an error!
       console.error(error);
     } else {
+      //fillRestaurantsHTMLfromDB();
       resetRestaurants(restaurants);
       fillRestaurantsHTML();
     }
@@ -115,6 +116,9 @@ var resetRestaurants = (restaurants) => {
   const ul = document.getElementById('restaurants-list');
   ul.innerHTML = '';
 
+  //Clean images cache
+  DBHelper.cleanImageCache();
+
   // Remove all map markers
   self.markers.forEach(m => m.setMap(null));
   self.markers = [];
@@ -126,6 +130,7 @@ var resetRestaurants = (restaurants) => {
  */
 var fillRestaurantsHTML = (restaurants = self.restaurants) => {
   const ul = document.getElementById('restaurants-list');
+  ul.innerHTML = '';
   restaurants.forEach(restaurant => {
     ul.append(createRestaurantHTML(restaurant));
   });
@@ -137,42 +142,44 @@ var fillRestaurantsHTML = (restaurants = self.restaurants) => {
  */
 var createRestaurantHTML = (restaurant) => {
   const li = document.createElement('li');
+  li.className = 'restaurant';
 
   const picture = document.createElement('picture');
   li.append(picture);
 
   const largeSourceWebp = document.createElement('source');
   largeSourceWebp.media = '(min-width: 750px)';
-  largeSourceWebp.srcset = DBHelper.imageUrlForRestaurant(restaurant) + '-800_large.webp';
+  largeSourceWebp.setAttribute('data-srcset', DBHelper.imageUrlForRestaurant(restaurant) + '-800_large.webp');
   largeSourceWebp.type = 'image/webp';
   picture.append(largeSourceWebp);
 
   const largeSource = document.createElement('source');
   largeSource.media = '(min-width: 750px)';
-  largeSource.srcset = DBHelper.imageUrlForRestaurant(restaurant) + '-800_large.jpg';
+  largeSource.setAttribute('data-srcset', DBHelper.imageUrlForRestaurant(restaurant) + '-800_large.jpg');
   largeSource.type = 'image/jpeg';
   picture.append(largeSource);
 
   const mediumSourceWebp = document.createElement('source');
   mediumSourceWebp.media = '(min-width: 500px)';
-  mediumSourceWebp.srcset = DBHelper.imageUrlForRestaurant(restaurant) + '_medium.webp';
+  mediumSourceWebp.setAttribute('data-srcset', DBHelper.imageUrlForRestaurant(restaurant) + '_medium.webp');
   mediumSourceWebp.type = 'image/webp';
   picture.append(mediumSourceWebp);
 
   const mediumSource = document.createElement('source');
   mediumSource.media = '(min-width: 500px)';
-  mediumSource.srcset = DBHelper.imageUrlForRestaurant(restaurant) + '_medium.jpg';
+  mediumSource.setAttribute('data-srcset', DBHelper.imageUrlForRestaurant(restaurant) + '_medium.jpg');
   mediumSource.type = 'image/jpeg';
   picture.append(mediumSource);
 
   const sourceWebp = document.createElement('source');
-  sourceWebp.srcset = DBHelper.imageUrlForRestaurant(restaurant) + '.webp';
+  sourceWebp.setAttribute('data-srcset', DBHelper.imageUrlForRestaurant(restaurant) + '.webp');
   sourceWebp.type = 'image/webp';
   picture.append(sourceWebp);
 
   const image = document.createElement('img');
   image.className = 'restaurant-img';
-  image.src = DBHelper.imageUrlForRestaurant(restaurant) + '.jpg';
+  image.src = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
+  image.setAttribute('data-src', DBHelper.imageUrlForRestaurant(restaurant) + '.jpg');
   image.alt = restaurant.name + ' is a ' + restaurant.cuisine_type + ' restaurant in ' + restaurant.address + '.';
   picture.append(image);
 
@@ -210,4 +217,16 @@ var addMarkersToMap = (restaurants = self.restaurants) => {
     });
     self.markers.push(marker);
   });
+};
+
+/**
+ * Initialize b-lazy
+ */
+document.onreadystatechange = () => {
+  if (document.readyState === 'complete') {
+    var bLazy = new Blazy({
+      selector: '.restaurant-img',
+      offset: 10
+    });
+  }
 };

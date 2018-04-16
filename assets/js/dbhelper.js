@@ -2,7 +2,6 @@
  * Common database helper functions.
  */
 class DBHelper {
-
   /**
    * Database URL.
    * Change this to restaurants.json file location on your server.
@@ -13,23 +12,73 @@ class DBHelper {
   }
 
   /**
+   * Open database
+   */
+  static openRestaurantsDB() {
+    // If the browser doesn't support service worker,
+    // we don't care about having a database
+    if (!navigator.serviceWorker) {
+      console.log('This browser doesn\'t support Service Worker');
+      return Promise.resolve();
+      if (!('indexedDB' in window)) {
+        console.log('This browser doesn\'t support IndexedDB');
+        return Promise.resolve();
+      }
+    }
+
+    return idb.open('restaurant-reviews-db', 1, function(upgradeDb) {
+      switch (upgradeDb.oldVersion) {
+        case 0:
+          const restaurantsStore = upgradeDb.createObjectStore('restaurants', { keyPath: 'id' });
+          restaurantsStore.createIndex('by-name', 'name');
+          restaurantsStore.createIndex('by-date', 'createdAt');
+          restaurantsStore.createIndex('by-cuisine', 'cuisine_type');
+          restaurantsStore.createIndex('by-neighborhood', 'neighborhood');
+      }
+    });
+  }
+
+  /**
    * Fetch all restaurants.
    */
   static fetchRestaurants(callback) {
-    let xhr = new XMLHttpRequest();
-    xhr.open('GET', DBHelper.DATABASE_URL);
-    xhr.onload = () => {
-      if (xhr.status === 200) { // Got a success response from server!
-        const json = JSON.parse(xhr.responseText);
-        const restaurants = json;
-        callback(null, restaurants);
-      } else { // Oops!. Got an error from server.
-        const error = (`Request failed. Returned status of ${xhr.status}`);
-        callback(error, null);
-      }
-    };
 
-    xhr.send();
+    fetch(DBHelper.DATABASE_URL).then(restaurants => {
+      return restaurants.json();
+    })
+      .then(restaurants => {
+        //If online request return data fill idb
+        this.openRestaurantsDB().then(function (db) {
+          var tx = db.transaction('restaurants', 'readwrite')
+          var restaurantsStore = tx.objectStore('restaurants');
+          restaurants.forEach(restaurant => {
+            restaurantsStore.put(restaurant);
+          });
+
+          // limit store to 10 items
+          restaurantsStore.index('by-date').openCursor(null, "prev").then(function(cursor) {
+            return cursor.advance(10);
+          }).then(function deleteRest(cursor) {
+            if (!cursor) return;
+            cursor.delete();
+            return cursor.continue().then(deleteRest);
+          });
+
+          callback(null, restaurants)
+        });
+      })
+      .catch(error => {
+        //If online request fails try to catch local idb data
+        this.openRestaurantsDB().then(function (db) {
+          var tx = db.transaction('restaurants')
+          var store = tx.objectStore('restaurants');
+          store.getAll().then(restaurants => {
+            callback(null, restaurants)
+          })
+            .catch(error => callback(error, null));
+        })
+          .catch(error => callback(error, null));
+      });
   }
 
   /**
@@ -166,6 +215,33 @@ class DBHelper {
       animation: google.maps.Animation.DROP}
     );
     return marker;
+  }
+
+  static cleanImageCache() {
+    return DBHelper.openRestaurantsDB().then(function(db) {
+      if (!db) return;
+
+      var imagesNeeded = [];
+
+      var tx = db.transaction('restaurants');
+      return tx.objectStore('restaurants').getAll().then(function(restaurants) {
+        restaurants.forEach(function(restaurant) {
+          if (restaurant.photograph) {
+            imagesNeeded.push(restaurant.photograph);
+          }
+        });
+
+        return caches.open('restaurant-reviews-content-imgs');
+      }).then(function(cache) {
+        return cache.keys().then(function(requests) {
+          requests.forEach(function(request) {
+            var url = new URL(request.url);
+            var urlIndex = url.pathnames.substring(0, url.pathnames.indexOf('_'));
+            if (!imagesNeeded.includes(urlIndex)) cache.delete(request);
+          });
+        });
+      });
+    });
   }
 
 }

@@ -9,7 +9,7 @@ const concat = require('gulp-concat');
 const uglify = require('gulp-uglify');
 const babel = require('gulp-babel');
 const sourcemaps = require('gulp-sourcemaps');
-const jasmine = require('gulp-jasmine-phantom');
+//const jasmine = require('gulp-jasmine-phantom');
 const imagemin = require('gulp-imagemin');
 const imageminWebp = require('imagemin-webp');
 const rename = require("gulp-rename");
@@ -23,6 +23,8 @@ gulp.task('serve', ['styles'], function() {
 
   gulp.watch('assets/sass/**/*.scss', ['styles']);
   gulp.watch('assets/js/**/*.js', ['lint', 'scripts']);
+  gulp.watch('assets/sw.js', ['sw']);
+  gulp.watch('assets/resources/*', ['resources']);
   gulp.watch('assets/img/*', ['images']);
   gulp.watch('views/**/*.ejs').on('change', browserSync.reload);
 });
@@ -30,25 +32,39 @@ gulp.task('serve', ['styles'], function() {
 // Compile sass into CSS & auto-inject into browsers
 gulp.task('styles', function() {
   return gulp.src('assets/sass/**/*.scss')
-    .pipe(sourcemaps.init())
+    //.pipe(sourcemaps.init())
     .pipe(sass({
       outputStyle: 'compressed'
     }).on('error', sass.logError))
     .pipe(autoprefixer({
       browsers: ['last 4 versions']
     }))
-    .pipe(sourcemaps.write())
+    //.pipe(sourcemaps.write())
     .pipe(gulp.dest('.tmp/public/styles'))
     .pipe(browserSync.stream());
 });
 
 gulp.task('scripts', function () {
-  gulp.src('assets/js/**/*.js')
-    .pipe(sourcemaps.init())
-    .pipe(babel()) // todo Transpiling breaks JS
-    .pipe(uglify()) // todo Can't minify ES6 code
-    .pipe(sourcemaps.write())
+  return gulp.src('assets/js/**/*.js')
+    //.pipe(sourcemaps.init())
+    .pipe(babel())
+    .pipe(uglify())
+    //.pipe(sourcemaps.write())
     .pipe(gulp.dest('.tmp/public/js'))
+    .pipe(browserSync.stream());
+});
+
+gulp.task('sw', function() {
+  return gulp.src('assets/sw.js')
+    .pipe(babel())
+    .pipe(uglify())
+    .pipe(gulp.dest('.tmp/public'))
+    .pipe(browserSync.stream());
+});
+
+gulp.task('resources', function() {
+  return gulp.src('assets/resources/*')
+    .pipe(gulp.dest('.tmp/public/resources'))
     .pipe(browserSync.stream());
 });
 
@@ -87,4 +103,4 @@ gulp.task('tests', function () {
 
 });
 
-gulp.task('default', ['serve', 'styles', 'lint', 'scripts']);
+gulp.task('default', ['serve', 'styles', 'lint', 'scripts', 'sw', 'resources']);
