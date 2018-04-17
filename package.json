@@ -7,6 +7,7 @@
   "dependencies": {
     "browser-sync": "^2.23.6",
     "browserify": "^16.2.0",
+    "compression": "^1.7.2",
     "gulp-eslint": "^4.0.2",
     "gulp-rename": "^1.2.2",
     "gulp-sourcemaps": "^2.6.4",
@@ -37,6 +38,7 @@
     "gulp-autoprefixer": "^5.0.0",
     "gulp-babel": "^7.0.1",
     "gulp-concat": "^2.6.1",
+    "gulp-gzip": "^1.4.2",
     "gulp-imagemin": "^4.1.0",
     "gulp-jasmine-phantom": "^3.0.0",
     "gulp-sass": "^4.0.1",

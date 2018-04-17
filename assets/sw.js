@@ -1,4 +1,4 @@
-var staticCacheName = 'restaurant-reviews-v43';
+var staticCacheName = 'restaurant-reviews-v48';
 var contentImgsCache = 'restaurant-reviews-content-imgs';
 var allCaches = [staticCacheName, contentImgsCache];
 var urlsToCache = [
@@ -6,10 +6,23 @@ var urlsToCache = [
   '/resources/restaurant.html',
   '/resources/manifest.json',
   '/styles/styles.css',
+  '/styles/restaurant-listing.css',
+  '/styles/restaurant.css',
   '/js/idb/lib/idb.js',
   '/js/dbhelper.js',
   '/js/main.js',
-  '/js/restaurant_info.js'
+  '/js/restaurant_info.js',
+  '/resources/homepage.html.gz',
+  '/resources/restaurant.html.gz',
+  '/resources/manifest.json.gz',
+  '/styles/styles.css.gz',
+  '/styles/restaurant-listing.css.gz',
+  '/styles/restaurant.css.gz',
+  '/js/idb/lib/idb.js.gz',
+  '/js/dbhelper.js.gz',
+  '/js/main.js.gz',
+  '/js/restaurant_info.js.gz',
+  'https://cdn.jsdelivr.net/npm/blazy@1.8.2/blazy.min.js'
 ];
 
 self.addEventListener('install', function(event) {
@@ -46,7 +59,7 @@ self.addEventListener('fetch', function(event) {
       return;
     }
 
-    if (requestUrl.pathname.startsWith('/restaurant?')) {
+    if (requestUrl.pathname === '/restaurant') {
       event.respondWith(caches.match('/resources/restaurant.html'));
       return;
     }

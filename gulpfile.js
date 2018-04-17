@@ -12,7 +12,8 @@ const sourcemaps = require('gulp-sourcemaps');
 //const jasmine = require('gulp-jasmine-phantom');
 const imagemin = require('gulp-imagemin');
 const imageminWebp = require('imagemin-webp');
-const rename = require("gulp-rename");
+const rename = require('gulp-rename');
+const gzip = require('gulp-gzip');
 
 // Static Server + watching scss/html files
 gulp.task('serve', ['styles'], function() {
@@ -41,6 +42,8 @@ gulp.task('styles', function() {
     }))
     //.pipe(sourcemaps.write())
     .pipe(gulp.dest('.tmp/public/styles'))
+    .pipe(gzip())
+    .pipe(gulp.dest('.tmp/public/styles'))
     .pipe(browserSync.stream());
 });
 
@@ -50,6 +53,8 @@ gulp.task('scripts', function () {
     .pipe(babel())
     .pipe(uglify())
     //.pipe(sourcemaps.write())
+    .pipe(gulp.dest('.tmp/public/js'))
+    .pipe(gzip())
     .pipe(gulp.dest('.tmp/public/js'))
     .pipe(browserSync.stream());
 });
@@ -64,6 +69,8 @@ gulp.task('sw', function() {
 
 gulp.task('resources', function() {
   return gulp.src('assets/resources/*')
+    .pipe(gulp.dest('.tmp/public/resources'))
+    .pipe(gzip())
     .pipe(gulp.dest('.tmp/public/resources'))
     .pipe(browserSync.stream());
 });
